@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turno de Medianoche — Diner 13</title>
+<style>
+:root{--green:#9dffb0;--red:#ff4f59;--amber:#ffc66d;--panel:rgba(5,9,10,.92);--line:rgba(180,220,200,.25);--mono:Consolas,Monaco,"Courier New",monospace}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#030505;color:#e8eee9;font-family:var(--mono)}button,select,input{font:inherit}button{border:1px solid var(--line);background:rgba(15,23,22,.88);color:#dce9df;padding:10px 13px;cursor:pointer;letter-spacing:.04em;text-transform:uppercase;transition:background .15s,border-color .15s,transform .15s}button:hover{background:rgba(35,55,46,.96);border-color:var(--green)}button:active{transform:translateY(1px)}button:disabled{opacity:.35;cursor:not-allowed}button.danger{border-color:#884447;color:#ffb8b8}button.active{background:#173322;border-color:var(--green);color:var(--green);box-shadow:0 0 12px #54bc6b25}button.small{padding:6px 9px;font-size:11px}.hidden{display:none!important}
+#game{position:fixed;inset:0}#scene{display:block;width:100%;height:100%;outline:none}#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.27) 76%,rgba(0,0,0,.8) 130%);z-index:2}#grain{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.085;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");mix-blend-mode:screen}#scanlines{position:absolute;inset:0;z-index:3;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,.11) 4px)}
+.hud{position:absolute;z-index:5;inset:0;pointer-events:none}.hud button,.hud select,.hud .interactive{pointer-events:auto}.top-left{position:absolute;top:18px;left:20px;text-shadow:0 1px 4px #000}.night-label{font-size:12px;color:#a6b8aa;letter-spacing:.18em}.clock{font-size:clamp(27px,4vw,42px);line-height:1.15;font-weight:bold;color:#f0f4ed}.top-right{position:absolute;right:20px;top:18px;text-align:right;min-width:170px}.power-number{font-size:24px;color:var(--green)}.power-track{height:7px;background:#202725;border:1px solid #48534b;width:170px;margin:6px 0 7px auto}.power-fill{height:100%;width:100%;background:var(--green);transition:width .25s,background .25s}.usage{font-size:11px;color:#b6c0b7}.usage-bars{display:flex;gap:3px;justify-content:flex-end;margin-top:5px}.usage-bars i{display:block;width:12px;height:7px;border:1px solid #627266;background:#18201a}.usage-bars i.on{background:var(--amber);border-color:var(--amber);box-shadow:0 0 5px #ffc66d70}.bottom-controls{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:end;flex-wrap:wrap;justify-content:center;width:min(760px,96vw)}.control-box{background:rgba(4,8,7,.75);border:1px solid var(--line);padding:8px;display:flex;gap:7px;align-items:center;backdrop-filter:blur(4px)}.control-box .label{font-size:10px;color:#9aa79d;letter-spacing:.12em;align-self:center;margin:0 3px}.control-btn{min-width:76px;font-size:11px}.door-indicator{display:block;font-size:10px;color:#91a297;margin-top:5px}.control-btn.closed{color:#ff9e9e;border-color:#a14646;background:#2b1215}.control-btn.lit{color:#fff1a8;border-color:#d3b452;background:#363019}.hint{position:absolute;bottom:8px;left:15px;color:#87938a;font-size:10px;letter-spacing:.04em}.reticle{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#c7ddc7;opacity:.25;transform:translate(-50%,-50%)}
+#brandOverlay,#modalLayer{position:absolute;z-index:20;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(1,3,3,.76);backdrop-filter:blur(5px)}.menu-card{width:min(590px,92vw);max-height:92vh;overflow:auto;border:1px solid #53645a;background:linear-gradient(145deg,rgba(12,19,16,.98),rgba(3,7,7,.98));padding:clamp(22px,4vw,42px);box-shadow:0 0 80px #000, inset 0 0 35px #0a1610}.eyebrow{font-size:11px;letter-spacing:.26em;color:#a1b6a4;text-transform:uppercase}.game-title{font-size:clamp(32px,7vw,58px);line-height:.98;letter-spacing:-.055em;margin:13px 0 6px;color:#edf3ec;text-shadow:3px 3px #31463b}.game-title span{display:block;color:#8eb49a;font-size:.46em;letter-spacing:.17em;margin-top:12px}.menu-copy{max-width:440px;color:#a5b0a6;font:13px/1.65 Arial,sans-serif;margin:20px 0}.menu-buttons{display:grid;gap:9px;margin-top:20px}.menu-buttons button{width:100%;text-align:left;padding:14px 16px}.menu-buttons button.primary{background:#16291d;border-color:#78a886;color:#eaffed}.menu-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:25px;color:#67786a;font-size:10px;letter-spacing:.08em}.settings-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid var(--line);font-size:13px}.settings-row input[type=range]{width:145px;accent-color:#8eb49a}.settings-row select{max-width:180px;background:#101815;color:#dce9df;border:1px solid var(--line);padding:8px}.subhead{font-size:14px;color:#dce9df;letter-spacing:.12em;margin:24px 0 8px}.small-copy{font:12px/1.6 Arial,sans-serif;color:#96a49a}.back-row{display:flex;gap:9px;margin-top:20px}.back-row button{flex:1}
+#monitor{position:absolute;z-index:10;inset:5% 4%;border:2px solid #68766d;background:rgba(5,8,7,.28);box-shadow:0 0 0 100vmax rgba(0,0,0,.56),0 0 50px #000;display:grid;grid-template-columns:1fr 245px;grid-template-rows:auto 1fr auto;gap:0;padding:12px;pointer-events:auto}.monitor-header{grid-column:1/3;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:2px 3px 10px;margin-bottom:10px}.monitor-title{color:var(--green);font-size:12px;letter-spacing:.16em}.signal{font-size:10px;color:#8ea296}.camera-view{position:relative;min-height:0;border:1px solid #48574c;background:rgba(4,7,5,.12);overflow:hidden}.camera-view:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.16) 4px);mix-blend-mode:screen}.cam-stamp{position:absolute;top:12px;left:12px;font-size:12px;text-shadow:0 2px 4px #000;background:#08100cbb;padding:6px 8px;z-index:2}.cam-bottom{position:absolute;bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;color:#9ba99d;font-size:10px;z-index:2;text-shadow:0 2px 4px #000}.camera-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 0 8px}.camera-buttons button{font-size:11px;padding:10px 6px;text-align:left}.camera-buttons button span{display:block;color:#7d8d81;font-size:9px;margin-top:4px}.monitor-side{padding-left:12px;display:flex;flex-direction:column;min-height:0}.monitor-side h3{font-size:11px;color:#95aa9a;letter-spacing:.13em;font-weight:normal;margin:10px 0}.cam-map{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px}.cam-map button{font-size:9px;padding:8px 4px}.mini-map{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px;padding:6px;border:1px solid var(--line);background:#09100b}.mini-map button{padding:7px 2px;font-size:8px;color:#b4c6b8}.log-panel{position:absolute;z-index:30;inset:8%;background:#080d0a;border:1px solid #6e7c70;padding:24px;overflow:auto;box-shadow:0 0 0 100vmax #000a}.log-panel h2{font-size:18px;color:#b7d9bf;letter-spacing:.1em}.log-entry{border-left:2px solid #536e5a;padding:8px 12px;margin:14px 0;background:#0d1510;font:12px/1.65 Arial,sans-serif;color:#c3cec5}.log-entry b{font:11px var(--mono);display:block;color:#a2c6aa;margin-bottom:5px;letter-spacing:.08em}
+#toast{position:absolute;z-index:15;left:50%;top:23%;transform:translateX(-50%);max-width:min(600px,90vw);padding:14px 20px;background:#040807eF;border:1px solid #6c8c74;text-align:center;font:13px/1.55 Arial,sans-serif;color:#c9d8cc;box-shadow:0 0 35px #000;pointer-events:none}.toast-title{display:block;font:10px var(--mono);color:var(--green);letter-spacing:.18em;margin-bottom:6px}#dangerFlash{position:absolute;z-index:9;inset:0;pointer-events:none;background:#d20b1325;opacity:0;transition:opacity .1s}.static-flash{animation:staticFlash .22s steps(2) infinite}@keyframes staticFlash{0%{opacity:.03}50%{opacity:.22}100%{opacity:.05}}.screen-centered{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;background:#020403dd;backdrop-filter:blur(3px)}.result-card{width:min(520px,90vw);padding:30px;border:1px solid #56655a;background:#070c09;text-align:center;box-shadow:0 0 70px #000}.result-card h2{font-size:clamp(27px,5vw,42px);margin:0 0 12px;letter-spacing:.04em}.result-card p{color:#a2b0a5;font:13px/1.6 Arial,sans-serif}.result-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:22px}.result-actions button{min-width:145px}.red{color:#ff696d!important}.green{color:var(--green)!important}.mobile-tip{display:none}
+@media(max-width:760px){.top-left{top:10px;left:11px}.top-right{top:10px;right:11px;min-width:130px}.power-track{width:130px}.clock{font-size:30px}.night-label{font-size:9px}.power-number{font-size:19px}.bottom-controls{bottom:12px;width:100%;gap:4px}.control-box{padding:5px;gap:4px}.control-btn{min-width:62px;padding:8px 5px;font-size:9px}.control-box .label{display:none}.hint{font-size:8px;bottom:3px;left:7px}#monitor{inset:2%;padding:7px;grid-template-columns:1fr 125px;grid-template-rows:auto 1fr auto}.monitor-side{padding-left:7px}.camera-buttons{gap:4px;padding:7px 0}.camera-buttons button{padding:7px 4px;font-size:9px}.camera-buttons button span{font-size:8px}.monitor-title{font-size:10px}.cam-stamp{top:6px;left:6px;font-size:10px}.cam-bottom{bottom:5px;left:5px;right:5px;font-size:8px}.cam-map button{padding:6px 2px;font-size:8px}.monitor-side h3{font-size:9px;margin:8px 0}.mobile-tip{display:block;color:#8b9b8e;font-size:9px;margin-top:12px}.menu-foot{font-size:8px}.menu-copy{font-size:12px}}
+</style>
+</head>
+<body>
+<div id="game">
+  <canvas id="scene" aria-label="Escena tridimensional del juego"></canvas>
+  <div id="vignette"></div><div id="grain"></div><div id="scanlines"></div><div id="dangerFlash"></div>
+  <div id="hud" class="hud hidden">
+    <div class="top-left"><div class="night-label" id="nightLabel">TURNO 01 // NOCHE 1</div><div class="clock" id="clock">12:00 AM</div></div>
+    <div class="top-right"><div class="night-label">ENERGÍA RESTANTE</div><div class="power-number" id="powerNumber">100%</div><div class="power-track"><div id="powerFill" class="power-fill"></div></div><div class="usage" id="usageText">CONSUMO: 1 UNIDAD</div><div class="usage-bars" id="usageBars"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
+    <div class="bottom-controls">
+      <div class="control-box"><span class="label">IZQUIERDA</span><button id="leftDoorBtn" class="control-btn">PUERTA <span class="door-indicator" id="leftDoorText">ABIERTA</span></button><button id="leftLightBtn" class="control-btn">LUZ <span class="door-indicator" id="leftLightText">APAGADA</span></button></div>
+      <div class="control-box"><button id="monitorBtn" class="control-btn active">▣ CÁMARAS <span class="door-indicator">[ESPACIO]</span></button></div>
+      <div class="control-box"><span class="label">DERECHA</span><button id="rightLightBtn" class="control-btn">LUZ <span class="door-indicator" id="rightLightText">APAGADA</span></button><button id="rightDoorBtn" class="control-btn">PUERTA <span class="door-indicator" id="rightDoorText">ABIERTA</span></button></div>
+    </div>
+    <div class="hint">RATÓN: MIRAR · ESPACIO: MONITOR · ESC: PAUSA</div><div id="reticle" class="reticle"></div>
+  </div>
+  <div id="monitor" class="hidden">
+    <div class="monitor-header"><div><div class="monitor-title">D13 // SISTEMA DE VIGILANCIA</div><div class="signal" id="cameraSubtitle">SEÑAL ESTABLE · CAM-01</div></div><button id="closeMonitorBtn" class="small">CERRAR [ESPACIO]</button></div>
+    <div class="camera-view" id="cameraView"><div class="cam-stamp" id="camStamp">CAM-01 · ESCENARIO</div><div class="cam-bottom"><span id="camStatus">REC · 00:00:00</span><span id="camEntities">MOVIMIENTO: NINGUNO</span></div></div>
+    <div class="monitor-side"><h3>SELECCIÓN DE CÁMARA</h3><div class="camera-buttons" id="cameraButtons"></div><h3>ESTADO DEL SISTEMA</h3><div class="small-copy" id="systemReadout">ENLACE ACTIVO<br>ALIMENTACIÓN NORMAL</div><div id="miniMap" class="mini-map hidden"><button data-map-camera="5">ALM</button><button data-map-camera="0">ESC</button><button data-map-camera="1">COM</button><button data-map-camera="7">LONA</button><button data-map-camera="2">OESTE</button><button data-map-camera="3">ESTE</button><button data-map-camera="4">COC</button><button data-map-camera="6">MANT</button></div><div class="cam-map"><button id="archiveBtn">ARCHIVO</button><button id="mapBtn">MAPA</button></div></div>
+    <div class="signal" style="grid-column:1/3;padding-top:7px">ATENCIÓN: LA OBSERVACIÓN CONTINUA NO GARANTIZA SEGURIDAD.</div>
+  </div>
+  <div id="toast" class="hidden"><span class="toast-title">MENSAJE DEL TURNO</span><span id="toastText"></span></div>
+  <div id="logPanel" class="log-panel hidden"><h2>ARCHIVO DE INCIDENTES // D13</h2><p class="small-copy">Documentos recuperados del terminal local. Algunos registros están dañados.</p><div id="logEntries"></div><button id="closeArchiveBtn">CERRAR ARCHIVO</button></div>
+  <div id="brandOverlay">
+    <div class="menu-card" id="mainMenu">
+      <div class="eyebrow">D13 SECURITY SYSTEM · BUILD 1.0</div><h1 class="game-title">TURNO DE<span>MEDIANOCHE</span></h1>
+      <p class="menu-copy">La última pizzería del distrito cerró hace meses. Aun así, cada noche se encienden las luces del escenario. Tu turno termina a las 6:00 AM. Mantén la calma, controla el consumo y no confíes en el silencio.</p>
+      <div class="menu-buttons"><button id="newGameBtn" class="primary">▶ INICIAR NUEVA PARTIDA</button><button id="continueBtn">▣ CONTINUAR · NOCHE <span id="continueNight">1</span></button><button id="selectNightBtn">☷ SELECCIONAR NOCHE DESBLOQUEADA</button><button id="settingsBtn">⚙ AJUSTES</button></div>
+      <div class="menu-foot"><span>EXPERIENCIA DE TERROR ORIGINAL</span><span>RECOMENDADO: AURICULARES</span></div>
+    </div>
+    <div class="menu-card hidden" id="nightSelect"><div class="eyebrow">SELECCIÓN DE TURNO</div><h2 class="game-title" style="font-size:34px">NOCHES<span>ARCHIVO DISPONIBLE</span></h2><p class="menu-copy">Solo puedes iniciar noches que hayas desbloqueado al sobrevivir.</p><div id="nightButtons" class="menu-buttons"></div><div class="back-row"><button id="nightSelectBack">VOLVER</button></div></div>
+    <div class="menu-card hidden" id="settingsMenu"><div class="eyebrow">PREFERENCIAS DEL SISTEMA</div><h2 class="game-title" style="font-size:34px">AJUSTES<span>CONFIGURACIÓN LOCAL</span></h2><div class="settings-row"><label for="volumeRange">Volumen de audio</label><input id="volumeRange" type="range" min="0" max="100" value="55"></div><div class="settings-row"><label for="qualitySelect">Calidad gráfica</label><select id="qualitySelect"><option value="low">Baja · rendimiento</option><option value="medium" selected>Media · equilibrada</option><option value="high">Alta · sombras</option></select></div><div class="settings-row"><label for="flickerToggle">Parpadeo visual</label><input id="flickerToggle" type="checkbox" checked></div><div class="small-copy" style="margin-top:15px">El audio se genera localmente mediante Web Audio. No se necesitan archivos de sonido externos.</div><div class="back-row"><button id="settingsBack">VOLVER</button><button id="saveSettingsBtn" class="primary">APLICAR</button></div></div>
+  </div>
+  <div id="modalLayer" class="hidden"><div class="result-card"><h2 id="modalTitle">PAUSA</h2><p id="modalText">La noche permanece detenida.</p><div class="result-actions" id="modalActions"></div></div></div>
+</div>
+<script type="module">
+let THREE; // Three.js se carga bajo demanda; si el CDN falla, se muestra una explicación visible.
+
+const $ = id => document.getElementById(id);
+const ui = {
+  canvas:$('scene'), hud:$('hud'), brand:$('brandOverlay'), mainMenu:$('mainMenu'), nightSelect:$('nightSelect'), settingsMenu:$('settingsMenu'),
+  monitor:$('monitor'), toast:$('toast'), toastText:$('toastText'), logPanel:$('logPanel'), logEntries:$('logEntries'), modal:$('modalLayer'),
+  clock:$('clock'), nightLabel:$('nightLabel'), powerNumber:$('powerNumber'), powerFill:$('powerFill'), usageText:$('usageText'), usageBars:$('usageBars'),
+  leftDoorBtn:$('leftDoorBtn'), rightDoorBtn:$('rightDoorBtn'), leftLightBtn:$('leftLightBtn'), rightLightBtn:$('rightLightBtn'),
+  leftDoorText:$('leftDoorText'), rightDoorText:$('rightDoorText'), leftLightText:$('leftLightText'), rightLightText:$('rightLightText'),
+  cameraButtons:$('cameraButtons'), camStamp:$('camStamp'), cameraSubtitle:$('cameraSubtitle'), camStatus:$('camStatus'), camEntities:$('camEntities'),
+  cameraView:$('cameraView'), systemReadout:$('systemReadout'), dangerFlash:$('dangerFlash')
+};
+const CAMERAS = [
+ {id:0,name:'Escenario',short:'STAGE',pos:[0,3.4,-18],look:[0,1.4,-12],desc:'ESCENARIO PRINCIPAL'},
+ {id:1,name:'Comedor',short:'DINING',pos:[-5,3.8,-13],look:[0,1.2,-9],desc:'COMEDOR'},
+ {id:2,name:'Pasillo oeste',short:'WEST HALL',pos:[-3.3,2.8,-7],look:[-3.6,1,-3],desc:'PASILLO IZQUIERDO'},
+ {id:3,name:'Pasillo este',short:'EAST HALL',pos:[3.3,2.8,-7],look:[3.6,1,-3],desc:'PASILLO DERECHO'},
+ {id:4,name:'Cocina',short:'KITCHEN',pos:[10,3.5,-14],look:[8.2,1,-10],desc:'COCINA'},
+ {id:5,name:'Almacén',short:'STORAGE',pos:[-11,3.2,-13],look:[-9,1,-10],desc:'ALMACÉN'},
+ {id:6,name:'Mantenimiento',short:'REPAIR',pos:[11,3,-20],look:[9,1,-17],desc:'MANTENIMIENTO'},
+ {id:7,name:'Rincón de lona',short:'COVE',pos:[15,3,-15],look:[13,1,-12],desc:'ZONA DE FOXY'}
+];
+const LOCATIONS = {
+ stage:{name:'Escenario',cam:0,pos:[0,0,-12]}, dining:{name:'Comedor',cam:1,pos:[-4.5,0,-9]}, west:{name:'Pasillo oeste',cam:2,pos:[-3.8,0,-5]}, westDoor:{name:'Entrada oeste',cam:2,pos:[-5.4,0,-2.4]},
+ east:{name:'Pasillo este',cam:3,pos:[3.8,0,-5]}, eastDoor:{name:'Entrada este',cam:3,pos:[5.4,0,-2.4]}, kitchen:{name:'Cocina',cam:4,pos:[8,0,-10]}, storage:{name:'Almacén',cam:5,pos:[-9,0,-10]}, repair:{name:'Mantenimiento',cam:6,pos:[9,0,-17]}, cove:{name:'Rincón de lona',cam:7,pos:[13,0,-12]},
+ office:{name:'Oficina',cam:-1,pos:[0,0,0]}
+};
+const ROUTES = {
+ Bruno:['stage','dining','west','westDoor'],
+ Mica:['stage','dining','east','eastDoor'],
+ Pip:['storage','west','westDoor'],
+ Rusty:['cove','repair','kitchen','east','eastDoor']
+};
+const STORY = {
+ 1:'Buenas noches. Soy Elías, mantenimiento. Si escuchas pasos, revisa las cámaras antes de gastar energía cerrando puertas. El generador es antiguo y no aguanta todos los sistemas a la vez.',
+ 2:'Encontré marcas nuevas junto al escenario. Nadie debería estar dentro del edificio. Si ves que una figura ya no está donde la dejaste, no significa que la cámara esté averiada.',
+ 3:'El registro de mantenimiento dice que el mecanismo del rincón de lona se activa cuando nadie comprueba la cámara durante demasiado tiempo. No te quedes mirando una sola pantalla.',
+ 4:'La puerta este tiene una demora de cierre. La otra también, aunque el informe no lo admite. Escucha el sonido de los pasos: a veces llega antes que la imagen.',
+ 5:'Último turno. El archivo de incidentes fue borrado, pero alguien dejó una nota bajo la consola: «No necesitan entrar para que sepas que están aquí». Aguanta hasta las seis.'
+};
+const ARCHIVE = [
+ {night:1,title:'PARTE DE CIERRE · 17 OCT',text:'El comedor fue evacuado tras un corte de luz de siete minutos. El registro automático muestra cuatro figuras en el escenario durante el apagón, aunque el sistema solo tenía tres unidades conectadas.'},
+ {night:2,title:'ORDEN DE MANTENIMIENTO · 21 OCT',text:'No lubricar las articulaciones del modelo Bruno sin desconectar el módulo de sonido. Las risas que reproduce durante el diagnóstico no forman parte de la prueba aprobada.'},
+ {night:3,title:'NOTA SIN FIRMA · 03 NOV',text:'La cámara del rincón de lona no falla. La imagen se oscurece porque la cortina se mueve desde dentro. Nadie ha encontrado un mecanismo para abrirla.'},
+ {night:4,title:'TRANSCRIPCIÓN PARCIAL · 09 NOV',text:'«Cuando se apaguen las luces, no corras. El edificio escucha los golpes y responde con golpes. Espera el reloj. Solo mira el reloj».'},
+ {night:5,title:'REGISTRO RECUPERADO · 12 NOV',text:'Última entrada del turno: 05:59:41. El vigilante salió del edificio después de registrar el fin de la jornada. En la grabación, una quinta sombra permanece junto a la puerta hasta las 06:03.'}
+];
+const state = {
+ mode:'menu', night:1, unlocked:1, elapsed:0, nightDuration:240, power:100, usage:1, doors:{west:false,east:false}, lights:{west:false,east:false}, monitor:false, camera:0,
+ powerOut:false, outageTimer:0, pauseFrom:'playing', activeElapsed:0, lastCameraVisit:0, foxyMeter:0, flicker:true, volume:.55, quality:'medium', mapVisible:false, lookYaw:0, lookPitch:0, mouseDown:false, lastMouseX:0,lastMouseY:0,
+ anims:{}, eventClock:0, ambienceTimer:0, toastTimer:0, attackLock:0, wonNights:0, hiddenEvent:0, gameStarted:false, lastFrame:0, settingsBefore:'menu'
+};
+let scene, renderer, officeCamera, currentCamera, ambientLight, emergencyLight, pointLights=[], particles, dustPositions, dustGeometry, dustPoints;
+let doors3D={}, lights3D={}, cameras3D={}, animatronics={}, roomObjects=[], clockMesh, powerLamp, fanBlades=[], cameraHelpers=[];
+let audioCtx=null, masterGain=null, ambientOsc=null, ambientGain=null, audioUnlocked=false;
+let lastToast='', toastTimeout=null, resizeObserver;
+
+function initGame(){
+  renderer = new THREE.WebGLRenderer({canvas:ui.canvas,antialias:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, state.quality==='high'?1.5:1.2));
+  renderer.setSize(window.innerWidth,window.innerHeight,false);
+  renderer.shadowMap.enabled = state.quality==='high'; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92;
+  scene = new THREE.Scene(); scene.background=new THREE.Color(0x060907); scene.fog=new THREE.FogExp2(0x070b08,0.024);
+  officeCamera = new THREE.PerspectiveCamera(69,window.innerWidth/window.innerHeight,.1,150); officeCamera.position.set(0,1.62,1.3); officeCamera.rotation.order='YXZ';
+  currentCamera=officeCamera;
+  const hemi=new THREE.HemisphereLight(0x8eaa9a,0x171c19,.5); scene.add(hemi);
+  ambientLight=new THREE.AmbientLight(0x829080,.29); scene.add(ambientLight);
+  const moon=new THREE.DirectionalLight(0x718a79,.36); moon.position.set(-5,12,6); moon.castShadow=state.quality==='high'; scene.add(moon);
+  emergencyLight=new THREE.PointLight(0xb53c29,.22,12); emergencyLight.position.set(0,2.4,0); scene.add(emergencyLight); pointLights.push(emergencyLight);
+  createOffice(); createBuilding(); createSecurityCameras(); createAnimatronics(); createDust(); buildCameraButtons(); bindControls(); resize();
+  window.addEventListener('resize',resize);
+  state.unlocked=readProgress(); $('continueNight').textContent=state.unlocked; updateNightSelect(); updateMenu();
+  renderer.setAnimationLoop(animate);
+}
+function mat(color,roughness=.8,metalness=0,emissive=0x000000,emissiveIntensity=0){return new THREE.MeshStandardMaterial({color,roughness,metalness,emissive,emissiveIntensity});}
+function addBox(parent,name,pos,size,material,opts={}){const mesh=new THREE.Mesh(new THREE.BoxGeometry(...size),material);mesh.name=name;mesh.position.set(...pos);mesh.castShadow=!!opts.cast;mesh.receiveShadow=!!opts.receive;parent.add(mesh);return mesh;}
+function addCylinder(parent,name,pos,r1,r2,height,material,segments=12,rot=null){const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,height,segments),material);mesh.name=name;mesh.position.set(...pos);if(rot)mesh.rotation.set(...rot);mesh.castShadow=true;parent.add(mesh);return mesh;}
+function addSphere(parent,name,pos,scale,material,segments=14){const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,segments,Math.max(8,Math.floor(segments*.7))),material);mesh.name=name;mesh.position.set(...pos);mesh.scale.set(...scale);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
+function addRoomLight(pos,color,intensity,distance,cast=false){const l=new THREE.PointLight(color,intensity,distance,2);l.position.set(...pos);l.castShadow=cast;scene.add(l);pointLights.push(l);return l;}
+function createOffice(){
+  const floor=mat(0x252923,.98), wall=mat(0x202722,.94), ceiling=mat(0x141a16,.9), trim=mat(0x4b554a,.8), metal=mat(0x4a5550,.38,.7), darkMetal=mat(0x202725,.5,.65), wood=mat(0x41382a,.94), paper=mat(0x9b9a7c,1), screen=mat(0x102019,.4,.25,0x1b482b,.35);
+  addBox(scene,'office-floor',[0,-.14,0],[10,.25,9],floor,{receive:true});
+  addBox(scene,'office-back-wall',[0,2.2,-4.45],[10,4.6,.25],wall,{receive:true});
+  // Lateral walls leave real openings for the rolling shutters.
+  for(const x of [-4.95,4.95]){addBox(scene,'office-side-wall',[x,2.15,1.25],[.18,4.5,5.5],wall);addBox(scene,'office-side-wall',[x,2.15,-4.0],[.18,4.5,1.0],wall);}
+  addBox(scene,'office-ceiling',[0,4.48,0],[10,.2,9],ceiling);
+  for(let x=-4.5;x<=4.6;x+=1.5) addBox(scene,'wall-rib',[x,2.2,-4.28],[.055,4.1,.05],trim);
+  addBox(scene,'rear-warning-stripe',[0,.45,-4.29],[9,.08,.04],mat(0x79613a));
+  // Desk, legs, old CRT and papers.
+  addBox(scene,'desk-top',[0,.92,-.75],[3.7,.18,1.45],wood,{cast:true,receive:true});
+  for(const x of [-1.62,1.62])for(const z of [-1.25,-.25])addBox(scene,'desk-leg',[x,.43,z],[.12,.85,.12],darkMetal,{cast:true});
+  addBox(scene,'desk-front',[0,.61,-.05],[3.25,.45,.1],mat(0x302a21));
+  addBox(scene,'crt-shell',[0,1.46,-1.05],[1.05,.8,.62],darkMetal,{cast:true});
+  addBox(scene,'crt-screen',[0,1.48,-.728],[.83,.55,.025],screen);
+  addBox(scene,'crt-bezel',[0,1.91,-.72],[1.12,.08,.12],metal); addCylinder(scene,'crt-knob',[-.4,1.19,-.71],.055,.055,.045,trim,12,[Math.PI/2,0,0]);
+  addBox(scene,'keyboard',[.05,1.04,-.2],[.75,.045,.26],darkMetal); for(let i=0;i<3;i++) addBox(scene,'keyboard-row',[.05,1.067,-.28+i*.07],[.63,.008,.018],trim);
+  const papers=addBox(scene,'paper-stack',[-1.02,1.025,-.42],[.52,.035,.64],paper);papers.rotation.y=.18;papers.rotation.z=.02;
+  const note=addBox(scene,'note',[1.14,1.025,-.44],[.43,.025,.33],mat(0xb8b29a));note.rotation.y=-.24;
+  addCylinder(scene,'coffee-cup',[1.35,1.13,-.9],.12,.14,.25,mat(0x1b201b),16);addCylinder(scene,'coffee-inner',[1.35,1.262,-.9],.09,.09,.008,mat(0x0c0d0b),16);
+  // Ventilation fan with rotating blades.
+  addCylinder(scene,'fan-base',[-1.65,1.08,-1],.1,.13,.11,metal,12);
+  const fanHub=addCylinder(scene,'fan-hub',[-1.65,1.29,-1],.085,.085,.13,darkMetal,12,[Math.PI/2,0,0]);
+  const fanGroup=new THREE.Group();fanGroup.position.set(-1.65,1.29,-1);scene.add(fanGroup);
+  addCylinder(fanGroup,'fan-axis',[0,0,0],.06,.06,.13,metal,12,[Math.PI/2,0,0]);
+  for(let i=0;i<4;i++){const blade=addBox(fanGroup,'fan-blade',[0,.39,0],[.13,.52,.035],mat(0x4a544c));blade.rotation.z=i*Math.PI/2;}
+  fanBlades.push(fanGroup);
+  // Door frames and sliding metal shutters.
+  for(const side of ['west','east']){
+    const x=side==='west'?-4.86:4.86;
+    addBox(scene,side+'-frame-top',[x,3.4,-2.6],[.55,.18,2.2],metal);
+    addBox(scene,side+'-frame-front',[x,1.8,-3.65],[.28,3.3,.16],darkMetal);
+    addBox(scene,side+'-frame-back',[x,1.8,-1.55],[.28,3.3,.16],darkMetal);
+    doors3D[side]=addBox(scene,side+'-shutter',[x,4.25,-2.6],[.38,2.5,1.86],metal,{cast:true});doors3D[side].userData.openY=4.25;doors3D[side].userData.closedY=1.83;
+    for(let i=0;i<5;i++)addBox(scene,side+'-door-rib',[x+(side==='west'?.2:-.2),1.8,-3.42+i*.33],[.03,2.9,.035],trim);
+    lights3D[side]=addRoomLight([side==='west'?-4.1:4.1,2.3,-2.5],0xffedb0,0,5,false);lights3D[side].userData.offIntensity=0;
+    const status=addBox(scene,side+'-status',[side==='west'?-4.35:4.35,2.9,-1.6],[.08,.13,.08],mat(0x24412c, .4,.2,0x1a5e2c,.2));lights3D[side].userData.status=status;
+  }
+  addBox(scene,'ceiling-light-housing',[0,4.35,-.2],[1.2,.08,.38],metal);const tube=addBox(scene,'ceiling-light',[0,4.27,-.2],[1,.025,.22],mat(0x97b6a0,.3,.1,0x638c70,.5));
+  const overhead=addRoomLight([0,3.9,-.2],0x95b59b,.58,8,false);overhead.userData.baseIntensity=.58;pointLights.push(overhead);
+  // Emergency sign, vents and wall posters.
+  addBox(scene,'emergency-sign',[0,3.4,-4.27],[1.4,.38,.06],mat(0x292b20));addBox(scene,'sign-glow',[0,3.4,-4.225],[1.22,.22,.018],mat(0x5b2b24,.3,0,0x8c3426,.75));
+  addBox(scene,'left-poster',[-3.4,2.45,-4.25],[.86,1.05,.035],mat(0x54483a));addBox(scene,'right-poster',[3.4,2.45,-4.25],[.86,1.05,.035],mat(0x3e493d));
+  for(const x of [-2.1,2.1]){addBox(scene,'wall-vent',[x,3.65,-4.28],[.8,.34,.06],darkMetal);for(let i=0;i<5;i++)addBox(scene,'vent-slat',[x,3.53+i*.055,-4.235],[.7,.018,.018],metal);}
+  // Room threshold floor markings.
+  addBox(scene,'west-threshold',[-4.15,.015,-2.5],[.65,.025,1.8],mat(0x6b4a34));addBox(scene,'east-threshold',[4.15,.015,-2.5],[.65,.025,1.8],mat(0x6b4a34));
+}
+function createBuilding(){
+  const concrete=mat(0x222923,.97), wall=mat(0x171d19,.96), stripe=mat(0x4e4936), rusty=mat(0x463f31,.8,.25), curtain=mat(0x392b2c,.98), table=mat(0x36342b,.92), kitchenMetal=mat(0x59625b,.45,.7), black=mat(0x080b09,.9), poster=mat(0x695b41), metal=mat(0x4a5550,.38,.7);
+  // An extended facility with separated rooms and corridors.
+  addBox(scene,'central-hall-floor',[0,-.19,-10],[33,.22,18],concrete,{receive:true});
+  for(const [x,z,w,d] of [[0,-20,28,.22],[-14,-12,.22,16],[14,-12,.22,16],[0,-2,13,.22]]){
+    addBox(scene,'facility-wall',[x,2.1,z],[w,4.2,d],wall,{receive:true});
+  }
+  // Room floors set over hall base.
+  addBox(scene,'stage-floor',[0,-.05,-13],[8,.18,5],mat(0x3c352a));
+  addBox(scene,'dining-floor',[-5,-.035,-10],[8,.17,6],mat(0x302c24));
+  addBox(scene,'kitchen-floor',[8,-.03,-11],[7,.18,6],mat(0x303834));
+  addBox(scene,'storage-floor',[-9,-.035,-11],[6,.17,6],mat(0x2a3029));
+  addBox(scene,'repair-floor',[9,-.035,-17],[6,.17,5],mat(0x2b302a));
+  addBox(scene,'cove-floor',[13,-.04,-12],[4,.17,5],mat(0x282723));
+  // Stage platform and curtains.
+  addBox(scene,'stage-platform',[0,.42,-14],[6,.65,1.2],rusty,{cast:true});
+  for(const x of [-3.7,3.7]) addBox(scene,'stage-curtain-side',[x,2.1,-14],[.55,4.1,.32],curtain);
+  addBox(scene,'stage-curtain-top',[0,3.85,-14],[7.8,.55,.36],curtain);
+  for(let x=-3.2;x<3.5;x+=.48){const fold=addBox(scene,'curtain-fold',[x,2,-13.79],[.12,3.1,.08],mat(0x4b3839));fold.rotation.z=.06*Math.sin(x*3);}
+  // Dining tables, chairs and old lamps.
+  for(const [x,z] of [[-7,-8],[-3,-8],[-7,-12],[-3,-12]]){
+    addBox(scene,'dining-table',[x,.9,z],[2,.16,1.2],table,{cast:true});
+    for(const dx of [-.78,.78])for(const dz of [-.43,.43])addBox(scene,'table-leg',[x+dx,.42,z+dz],[.09,.8,.09],darkenMaterial(table,.35));
+    for(const dx of [-1.35,1.35]){addBox(scene,'chair-seat',[x+dx,.48,z],[.5,.13,.5],rusty);addBox(scene,'chair-back',[x+dx,.83,z-.2],[.48,.65,.12],rusty);}
+  }
+  // Kitchen counters and hanging pans.
+  addBox(scene,'kitchen-counter',[8.1,.95,-12.8],[5.5,1.6,.8],kitchenMetal,{cast:true});addBox(scene,'kitchen-counter-top',[8.1,1.78,-12.8],[5.7,.12,1],metal);
+  for(let x=6;x<=10;x+=1.2){addCylinder(scene,'hanging-pan',[x,3.05,-10],.28,.28,.07,kitchenMetal,16,[Math.PI/2,0,0]);}
+  addBox(scene,'fridge',[10.9,1.4,-10.2],[1,2.8,1.2],kitchenMetal,{cast:true});addBox(scene,'fridge-handle',[10.45,1.4,-9.56],[.06,.8,.04],metal);
+  for(let i=0;i<4;i++)addBox(scene,'shelf',[-10,0.7+i*.65,-12],[3.8,.08,1],rusty);
+  for(let i=0;i<5;i++)addBox(scene,'box',[ -11+(i%3)*1.15,.35+Math.floor(i/3)*.65,-11.3+(i%2)*.5],[.65,.55,.6],mat(0x64583f));
+  for(let i=0;i<3;i++){const rack=addBox(scene,'repair-rack',[8.6+i*1.4,1.15,-18.4],[.85,2.3,.45],darkMetal);for(let j=0;j<4;j++)addBox(scene,'rack-item',[8.6+i*1.4, .4+j*.5,-18.13],[.52,.23,.18],rusty);}
+  // Foil curtains in the cove and a warning lamp.
+  addBox(scene,'cove-curtain',[13,1.8,-14.2],[3.4,3.6,.18],curtain);for(let i=0;i<8;i++)addBox(scene,'cove-fold',[11.6+i*.4,1.8,-14.07],[.06,3.45,.05],mat(i%2?0x493537:0x2e2528));
+  addBox(scene,'cove-sign',[13,3.5,-14],[2.5,.25,.12],mat(0x382f24));
+  // corridor directional lights and several practical fixtures.
+  addRoomLight([0,3.8,-13],0x9b9a70,.65,9);addRoomLight([-5,3,-10],0x687c6d,.4,8);addRoomLight([8,3,-11],0x9b9977,.42,7);addRoomLight([-9,2.8,-11],0x7f927b,.25,6);addRoomLight([10,2.8,-17],0x7e9a83,.28,7);
+  // Hall markings and security call boxes.
+  for(const z of [-5,-7,-9,-11]){addBox(scene,'west-floor-tile',[-3.8,.005,z],[.08,.025,1.4],stripe);addBox(scene,'east-floor-tile',[3.8,.005,z],[.08,.025,1.4],stripe);}
+  for(const [x,z] of [[-4.8,-6.4],[4.8,-6.4],[-12,-13],[11.5,-18]]){addBox(scene,'junction-box',[x,2.2,z],[.4,.55,.18],darkMetal);addBox(scene,'junction-light',[x,2.3,z+.105],[.08,.08,.025],mat(0x6e332f,.4,.1,0x7d211d,.45));}
+}
+function darkenMaterial(source,factor){return mat(source.color.clone().multiplyScalar(factor),source.roughness,source.metalness);}
+function createSecurityCameras(){
+  for(const c of CAMERAS){
+    const cam=new THREE.PerspectiveCamera(58,1,.1,100);cam.position.set(...c.pos);cam.lookAt(...c.look);cameras3D[c.id]=cam;
+    const body=addBox(scene,'camera-housing',[c.pos[0],c.pos[1]+.6,c.pos[2]],[.42,.22,.26],mat(0x242c27,.42,.6));body.lookAt(...c.look);
+    const lens=addSphere(scene,'camera-lens',[c.pos[0],c.pos[1]+.55,c.pos[2]-.12],[.07,.07,.04],mat(0x1d4b37,.2,.35,0x2e7749,.5),10);lens.lookAt(...c.look);
+  }
+}
+function makeAnimatronic(name,type,color,accent){
+  const group=new THREE.Group();group.name=name;const bodyMat=mat(color,.52,.28), joint=mat(0x282d29,.38,.72), eye=mat(0xe7f6d1,.2,.05,0xd6ffb4,1.25), pupil=mat(0x080b08,.15,.1), accentMat=mat(accent,.55,.25), muzzle=mat(0x827b6c,.92,.05), metal=mat(0x4a5550,.38,.7);
+  addSphere(group,name+'-torso',[0,1.05,0],[.48,.64,.34],bodyMat,16);addSphere(group,name+'-head',[0,1.95,-.01],[.48,.47,.4],bodyMat,16);
+  if(type==='bear'){
+    for(const x of [-.31,.31]){addSphere(group,name+'-ear',[x,2.34,0],[.16,.19,.13],bodyMat);addSphere(group,name+'-ear-inner',[x,2.35,.11],[.075,.09,.03],accentMat);}
+    addSphere(group,name+'-muzzle',[0,1.83,.34],[.25,.16,.12],muzzle);addSphere(group,name+'-nose',[0,1.92,.445],[.09,.06,.04],joint);
+  }else if(type==='rabbit'){
+    for(const x of [-.25,.25]){const ear=addSphere(group,name+'-ear',[x,2.53,-.015],[.12,.36,.1],bodyMat);ear.rotation.z=x<0?-.12:.12;addSphere(group,name+'-ear-in',[x,2.55,.075],[.055,.25,.025],accentMat);}
+    addSphere(group,name+'-muzzle',[0,1.82,.34],[.24,.13,.12],muzzle);addSphere(group,name+'-teeth',[0,1.7,.43],[.12,.07,.04],mat(0xdad8c7));
+  }else if(type==='bird'){
+    addSphere(group,name+'-crest',[0,2.37,0],[.18,.17,.13],accentMat);addSphere(group,name+'-beak',[0,1.88,.39],[.16,.1,.18],accentMat);addSphere(group,name+'-bib',[0,1.18,.31],[.29,.24,.06],mat(0xb5ad8b));
+  }else if(type==='fox'){
+    for(const x of [-.29,.29]){const ear=addSphere(group,name+'-ear',[x,2.29,0],[.12,.2,.1],bodyMat);ear.rotation.z=x<0?-.28:.28;}
+    const snout=addSphere(group,name+'-snout',[0,1.85,.34],[.2,.14,.2],accentMat);snout.rotation.x=-.14;addSphere(group,name+'-nose',[0,1.89,.52],[.08,.055,.05],joint);
+    const hook=addCylinder(group,name+'-hook',[.35,.62,.02],.025,.06,.28,metal,8,[0,0,Math.PI/3]);
+  }
+  // Face eyes are always forward (+z); glowing only when the room is dim.
+  for(const x of [-.17,.17]){addSphere(group,name+'-eye',[x,2.02,.34],[.09,.095,.055],eye,12);addSphere(group,name+'-pupil',[x,2.02,.388],[.034,.045,.02],pupil,10);}
+  // Neck and limbs with pivot groups for simple procedural animation.
+  addCylinder(group,name+'-neck',[0,1.52,0],.14,.17,.22,joint,10);
+  const limbs=[];
+  for(const x of [-.36,.36]){
+    const arm=new THREE.Group();arm.position.set(x,1.38,0);group.add(arm);addSphere(arm,name+'-shoulder',[0,-.08,0],[.16,.18,.17],bodyMat);
+    const upper=addCylinder(arm,name+'-upper-arm',[0,-.28,0],.095,.12,.35,bodyMat,10);const fore=addCylinder(arm,name+'-forearm',[0,-.53,.015],.08,.09,.28,bodyMat,10);addSphere(arm,name+'-hand',[0,-.7,.04],[.12,.12,.12],joint);limbs.push(arm);
+    const leg=new THREE.Group();leg.position.set(x*.62,.64,0);group.add(leg);addCylinder(leg,name+'-leg',[0,-.18,0],.12,.14,.38,bodyMat,10);addBox(leg,name+'-foot',[0,-.4,.11],[.25,.14,.38],joint);limbs.push(leg);
+  }
+  group.userData={name,type,limbs,home:[0,0,0],sway:Math.random()*6.2};scene.add(group);return group;
+}
+function createAnimatronics(){
+  animatronics.Bruno=makeAnimatronic('Bruno','bear',0x5c5545,0x242d28);
+  animatronics.Mica=makeAnimatronic('Mica','bird',0xb4a54b,0x7b5b31);
+  animatronics.Pip=makeAnimatronic('Pip','rabbit',0x778b7a,0xbca08b);
+  animatronics.Rusty=makeAnimatronic('Rusty','fox',0x9b6349,0x45352d);
+  for(const [name,group] of Object.entries(animatronics)){
+    group.scale.setScalar(name==='Rusty'?.88:1);group.visible=false;
+    state.anims[name]={name,group,route:ROUTES[name],index:0,location:ROUTES[name][0],state:'idle',timer:5+Math.random()*4,moveTimer:0,doorTimer:0,attackTimer:0,difficulty:0,stun:0,steps:0,seenAt:0,aggression:0,blockedDoor:'',active:false,moveStart:null,moveTarget:null,moveProgress:0,moveDuration:0,rushing:false};
+    placeAnimatronic(state.anims[name],state.anims[name].location);
+  }
+}
+function placeAnimatronic(enemy,location){
+  enemy.location=location;const p=LOCATIONS[location]?.pos||[0,0,-12];enemy.group.position.set(p[0],p[1],p[2]);
+  enemy.group.rotation.y=location==='west'||location==='westDoor'?Math.PI*.55:location==='east'||location==='eastDoor'?-Math.PI*.55:Math.PI;
+  enemy.group.visible=enemy.active && !['office','blocked'].includes(location);
+}
+function createDust(){
+  const count=state.quality==='low'?90:state.quality==='medium'?160:260;dustPositions=new Float32Array(count*3);
+  for(let i=0;i<count;i++){dustPositions[i*3]=(Math.random()-.5)*25;dustPositions[i*3+1]=Math.random()*4;dustPositions[i*3+2]=-Math.random()*24;}
+  dustGeometry=new THREE.BufferGeometry();dustGeometry.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));const material=new THREE.PointsMaterial({color:0xacc2b1,size:.028,transparent:true,opacity:.32,depthWrite:false});dustPoints=new THREE.Points(dustGeometry,material);scene.add(dustPoints);
+}
+function buildCameraButtons(){
+  ui.cameraButtons.innerHTML='';
+  CAMERAS.forEach(cam=>{const b=document.createElement('button');b.className='';b.dataset.camera=cam.id;b.innerHTML=`CAM-${String(cam.id+1).padStart(2,'0')}<span>${cam.name}</span>`;b.addEventListener('click',()=>switchCamera(cam.id));ui.cameraButtons.appendChild(b);});updateCameraButtons();
+}
+function bindControls(){
+  $('newGameBtn').addEventListener('click',()=>{unlockAudio();state.night=1;startNight(1);});
+  $('continueBtn').addEventListener('click',()=>{unlockAudio();startNight(Math.min(state.unlocked,5));});
+  $('selectNightBtn').addEventListener('click',()=>showMenuPanel('nightSelect'));
+  $('settingsBtn').addEventListener('click',()=>{state.settingsBefore='menu';showMenuPanel('settingsMenu');});
+  $('nightSelectBack').addEventListener('click',()=>showMenuPanel('mainMenu'));
+  $('settingsBack').addEventListener('click',()=>{if(state.settingsBefore==='playing'){ui.brand.classList.add('hidden');ui.hud.classList.remove('hidden');state.mode='playing';}else showMenuPanel('mainMenu');});
+  $('saveSettingsBtn').addEventListener('click',()=>{state.volume=Number($('volumeRange').value)/100;state.quality=$('qualitySelect').value;state.flicker=$('flickerToggle').checked;if(masterGain)masterGain.gain.value=state.volume;applyQuality();saveProgress();if(state.settingsBefore==='playing'){ui.brand.classList.add('hidden');ui.hud.classList.remove('hidden');state.mode='playing';}else showMenuPanel('mainMenu');});
+  ui.leftDoorBtn.addEventListener('click',()=>toggleDoor('west'));ui.rightDoorBtn.addEventListener('click',()=>toggleDoor('east'));
+  ui.leftLightBtn.addEventListener('click',()=>toggleLight('west'));ui.rightLightBtn.addEventListener('click',()=>toggleLight('east'));
+  $('monitorBtn').addEventListener('click',toggleMonitor);$('closeMonitorBtn').addEventListener('click',closeSecurityMonitor);
+  $('archiveBtn').addEventListener('click',openArchive);$('closeArchiveBtn').addEventListener('click',()=>ui.logPanel.classList.add('hidden'));
+  $('mapBtn').addEventListener('click',()=>{state.mapVisible=!state.mapVisible;$('miniMap').classList.toggle('hidden',!state.mapVisible);$('mapBtn').textContent=state.mapVisible?'CERRAR MAPA':'MAPA';});
+  document.querySelectorAll('[data-map-camera]').forEach(button=>button.addEventListener('click',()=>switchCamera(Number(button.dataset.mapCamera))));
+  ui.canvas.addEventListener('pointerdown',e=>{if(state.mode!=='playing'||state.monitor||e.button!==0)return;state.mouseDown=true;state.lastMouseX=e.clientX;state.lastMouseY=e.clientY;});
+  window.addEventListener('pointerup',()=>state.mouseDown=false);
+  window.addEventListener('pointermove',e=>{if(!state.mouseDown||state.mode!=='playing'||state.monitor)return;const dx=e.clientX-state.lastMouseX,dy=e.clientY-state.lastMouseY;state.lastMouseX=e.clientX;state.lastMouseY=e.clientY;state.lookYaw=THREE.MathUtils.clamp(state.lookYaw-dx*.0035,-1.52,1.52);state.lookPitch=THREE.MathUtils.clamp(state.lookPitch-dy*.0027,-.22,.2);});
+  window.addEventListener('keydown',e=>{
+    if(['Space','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();
+    if(state.mode==='playing'){
+      if(e.code==='Space'){toggleMonitor();}else if(e.code==='Escape'){pauseGame();}else if(e.code==='ArrowLeft')toggleDoor('west');else if(e.code==='ArrowRight')toggleDoor('east');else if(e.code==='KeyQ')toggleLight('west');else if(e.code==='KeyE')toggleLight('east');
+    }else if(state.mode==='paused'&&e.code==='Escape'){if(!ui.settingsMenu.classList.contains('hidden'))$('settingsBack').click();else resumeGame();}
+  });
+}
+function resize(){if(!renderer)return;renderer.setSize(window.innerWidth,window.innerHeight,false);officeCamera.aspect=window.innerWidth/window.innerHeight;officeCamera.updateProjectionMatrix();CAMERAS.forEach(c=>{const cam=cameras3D[c.id];if(cam){cam.aspect=1.35;cam.updateProjectionMatrix();}});}
+function showMenuPanel(panel){ui.brand.classList.remove('hidden');for(const p of [ui.mainMenu,ui.nightSelect,ui.settingsMenu])p.classList.add('hidden');$(panel).classList.remove('hidden');}
+function updateMenu(){ $('continueNight').textContent=state.unlocked; $('continueBtn').disabled=!state.unlocked;updateNightSelect(); }
+function updateNightSelect(){const container=$('nightButtons');container.innerHTML='';for(let n=1;n<=5;n++){const b=document.createElement('button');b.textContent=`${n<state.unlocked?'✓ ':'▶ '}NOCHE ${n}${n>state.unlocked?' · BLOQUEADA':''}`;b.disabled=n>state.unlocked;b.className=n===state.unlocked?'primary':'';b.addEventListener('click',()=>{unlockAudio();startNight(n);});container.appendChild(b);}}
+function readProgress(){try{return Math.max(1,Math.min(5,Number(localStorage.getItem('d13-unlocked')||1)));}catch(e){return 1;}}
+function saveProgress(){try{localStorage.setItem('d13-unlocked',String(state.unlocked));localStorage.setItem('d13-volume',String(state.volume));localStorage.setItem('d13-quality',state.quality);}catch(e){}}
+function applyQuality(){if(renderer){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,state.quality==='high'?1.5:state.quality==='medium'?1.2:1));renderer.shadowMap.enabled=state.quality==='high';}if(dustPoints){dustPoints.visible=state.quality!=='low';}if(ambientLight)ambientLight.intensity=state.quality==='low'?.35:.29;}
+function unlockAudio(){
+  if(audioCtx){if(audioCtx.state==='suspended')audioCtx.resume();return;}
+  try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=state.volume;masterGain.connect(audioCtx.destination);
+    ambientOsc=audioCtx.createOscillator();ambientOsc.type='sawtooth';ambientOsc.frequency.value=43;ambientGain=audioCtx.createGain();ambientGain.gain.value=.018;ambientOsc.connect(ambientGain);ambientGain.connect(masterGain);ambientOsc.start();audioUnlocked=true;
+  }catch(e){console.warn('Audio no disponible',e);}
+}
+function playTone(freq=220,duration=.12,type='sine',gain=.12,slide=0){if(!audioCtx||!masterGain)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+slide),audioCtx.currentTime+duration);g.gain.setValueAtTime(gain,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(masterGain);o.start();o.stop(audioCtx.currentTime+duration+.02);}catch(e){}}
+function playNoise(duration=.18,gain=.12){if(!audioCtx||!masterGain)return;const length=Math.floor(audioCtx.sampleRate*duration),buffer=audioCtx.createBuffer(1,length,audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/length,.55);const source=audioCtx.createBufferSource(),g=audioCtx.createGain();source.buffer=buffer;g.gain.value=gain;source.connect(g);g.connect(masterGain);source.start();}
+function soundEvent(type){if(!audioCtx)return;switch(type){case'door':playTone(90,.22,'square',.09,-30);playNoise(.12,.035);break;case'light':playTone(420,.06,'square',.035);break;case'camera':playNoise(.24,.055);playTone(130,.16,'sawtooth',.045,-45);break;case'step':playTone(72,.22,'triangle',.06,-15);break;case'laugh':playTone(390,.15,'sawtooth',.05,140);setTimeout(()=>playTone(310,.22,'sawtooth',.055,-80),160);break;case'blocked':playNoise(.22,.08);playTone(62,.35,'square',.11,-18);break;case'jumpscare':playNoise(.75,.24);playTone(68,.65,'sawtooth',.2,480);setTimeout(()=>playTone(56,.5,'square',.13,-25),100);break;case'win':playTone(520,.2,'sine',.1,100);setTimeout(()=>playTone(690,.4,'sine',.09,150),180);break;case'power':playTone(100,.5,'sawtooth',.08,-45);break;}}
+function showToast(title,text,duration=3600){$('toast').querySelector('.toast-title').textContent=title;ui.toastText.textContent=text;ui.toast.classList.remove('hidden');state.toastTimer=duration/1000;}
+function startNight(n){
+  unlockAudio();state.night=Math.max(1,Math.min(5,n));state.mode='playing';state.elapsed=0;state.activeElapsed=0;state.nightDuration=240;state.power=100;state.powerOut=false;state.outageTimer=0;state.monitor=false;state.camera=0;state.eventClock=0;state.ambienceTimer=3;state.attackLock=0;state.foxyMeter=0;state.hiddenEvent=0;state.lookYaw=0;state.lookPitch=0;
+  state.doors={west:false,east:false};state.lights={west:false,east:false};
+  for(const side of ['west','east']){doors3D[side].position.y=doors3D[side].userData.openY;doors3D[side].userData.targetY=doors3D[side].userData.openY;lights3D[side].intensity=0;}
+  ambientLight.intensity=state.quality==='low'?.35:.29;emergencyLight.intensity=.22;const poster=scene.getObjectByName('right-poster');if(poster)poster.material.color.set(0x3e493d);
+  for(const [name,e] of Object.entries(state.anims)){e.group.scale.setScalar(name==='Rusty'?.88:1);e.moveTarget=null;e.moveStart=null;e.moveProgress=0;e.rushing=false;e.active=false;e.state='idle';e.index=0;e.timer=(name==='Bruno'?8:name==='Mica'?10:name==='Pip'?7:13)+Math.random()*3;e.moveTimer=0;e.doorTimer=0;e.attackTimer=0;e.stun=0;e.steps=0;e.aggression=0;e.blockedDoor='';e.location=e.route[0];e.group.visible=false;placeAnimatronic(e,e.location);}
+  // A quieter entry to later nights, but all four routes are real and connected.
+  state.anims.Bruno.active=true;state.anims.Bruno.location='stage';placeAnimatronic(state.anims.Bruno,'stage');
+  if(state.night>=1){state.anims.Pip.active=true;placeAnimatronic(state.anims.Pip,'storage');}
+  if(state.night>=2){state.anims.Mica.active=true;placeAnimatronic(state.anims.Mica,'stage');}
+  if(state.night>=3){state.anims.Rusty.active=true;placeAnimatronic(state.anims.Rusty,'cove');}
+  ui.brand.classList.add('hidden');ui.modal.classList.add('hidden');ui.logPanel.classList.add('hidden');ui.hud.classList.remove('hidden');ui.monitor.classList.add('hidden');ui.toast.classList.add('hidden');ui.dangerFlash.style.opacity='0';
+  currentCamera=officeCamera;updateControls();updatePowerUI();updateClockUI();updateCameraButtons();showToast(`NOCHE ${state.night} · 12:00 AM`,STORY[state.night],5200);soundEvent('camera');state.gameStarted=true;state.lastCameraVisit=0;
+}
+function toggleDoor(side){if(state.mode!=='playing'||state.powerOut)return;if(state.monitor){closeSecurityMonitor();}state.doors[side]=!state.doors[side];doors3D[side].userData.targetY=state.doors[side]?doors3D[side].userData.closedY:doors3D[side].userData.openY;doors3D[side].userData.moving=true;soundEvent('door');updateControls();if(state.doors[side]){for(const e of Object.values(state.anims)){if(!e.active)continue;const matching=side==='west'?e.location==='westDoor':e.location==='eastDoor';if(matching){e.state='blocked';e.blockedDoor=side;e.stun=2.5;e.doorTimer=0;soundEvent('blocked');}}}}
+function toggleLight(side){if(state.mode!=='playing'||state.powerOut)return;if(state.monitor)closeSecurityMonitor();state.lights[side]=!state.lights[side];soundEvent('light');updateControls();let near=Object.values(state.anims).some(e=>e.active&&(side==='west'?e.location==='westDoor':e.location==='eastDoor'));if(state.lights[side]&&near){showToast('MOVIMIENTO DETECTADO',side==='west'?'Hay una silueta en la entrada oeste.':'Hay una silueta en la entrada este.',1500);playTone(690,.1,'sine',.045);} }
+function openSecurityMonitor(){if(state.mode!=='playing'||state.powerOut)return;state.monitor=true;state.camera=Math.max(0,Math.min(7,state.camera));ui.monitor.classList.remove('hidden');$('monitorBtn').classList.add('active');state.lastCameraVisit=state.elapsed;state.foxyMeter=Math.max(0,state.foxyMeter-.8);switchCamera(state.camera,true);soundEvent('camera');updateControls();}
+function closeSecurityMonitor(){state.monitor=false;ui.monitor.classList.add('hidden');$('monitorBtn').classList.remove('active');currentCamera=officeCamera;state.lastCameraVisit=state.elapsed;soundEvent('camera');updateControls();}
+function toggleMonitor(){if(state.mode!=='playing'||state.powerOut)return;if(state.monitor)closeSecurityMonitor();else openSecurityMonitor();}
+function switchCamera(id,skipSound=false){if(state.mode!=='playing'||state.powerOut)return;state.camera=Math.max(0,Math.min(CAMERAS.length-1,id));currentCamera=cameras3D[state.camera];const c=CAMERAS[state.camera];ui.camStamp.textContent=`CAM-${String(c.id+1).padStart(2,'0')} · ${c.desc}`;ui.cameraSubtitle.textContent=`${Math.random()<.07?'SEÑAL INESTABLE':'SEÑAL ESTABLE'} · ${c.short}`;state.lastCameraVisit=state.elapsed;if(state.camera===7)state.foxyMeter=Math.max(0,state.foxyMeter-.2);updateCameraButtons();updateCameraReadout();if(!skipSound)soundEvent('camera');}
+function updateCameraButtons(){ui.cameraButtons.querySelectorAll('button').forEach(b=>{b.classList.toggle('active',Number(b.dataset.camera)===state.camera);});}
+function updateCameraReadout(){
+  if(!ui.monitor||ui.monitor.classList.contains('hidden'))return;const c=CAMERAS[state.camera];const visible=Object.values(state.anims).filter(e=>e.active&&e.location!=='office'&&LOCATIONS[e.location]?.cam===state.camera);ui.camEntities.textContent=visible.length?`MOVIMIENTO: ${visible.map(e=>e.name.toUpperCase()).join(', ')}`:'MOVIMIENTO: NINGUNO';
+  ui.camStatus.textContent=`REC · ${formatTime(state.elapsed)} · ${Math.random()<.025?'SIGNAL LOST':'ENLACE ACTIVO'}`;ui.systemReadout.innerHTML=`CÁMARA: ${c.short}<br>DISPOSITIVOS: ${getActiveDevices()}<br>ENERGÍA: ${Math.ceil(state.power)}%<br>PUERTA OESTE: ${state.doors.west?'CERRADA':'ABIERTA'}<br>PUERTA ESTE: ${state.doors.east?'CERRADA':'ABIERTA'}`;
+  const view=ui.cameraView;view.classList.toggle('static-flash',Math.random()<.018||state.powerOut);view.style.filter=Math.random()<.04?'contrast(1.8) brightness(.6) hue-rotate(22deg)':'none';
+}
+function openArchive(){if(state.mode!=='playing')return;ui.logEntries.innerHTML='';ARCHIVE.filter(a=>a.night<=state.night).forEach(a=>{const el=document.createElement('div');el.className='log-entry';el.innerHTML=`<b>${a.title}</b>${a.text}`;ui.logEntries.appendChild(el);});const extra=document.createElement('div');extra.className='log-entry';extra.innerHTML=`<b>NOTA DEL TURNO ${state.night}</b>${['El informe no registra movimientos fuera del horario de apertura.','Las cámaras analógicas graban unos segundos después del movimiento real.','El generador no debe superar tres unidades de consumo.','No se autoriza el cierre simultáneo de puertas salvo emergencia.','Al alcanzar las 06:00, el bloqueo automático debería liberarse.'][state.night-1]}`;ui.logEntries.appendChild(extra);ui.logPanel.classList.remove('hidden');}
+function updateControls(){
+  for(const side of ['west','east']){
+    const db=side==='west'?ui.leftDoorBtn:ui.rightDoorBtn,lb=side==='west'?ui.leftLightBtn:ui.rightLightBtn,dt=side==='west'?ui.leftDoorText:ui.rightDoorText,lt=side==='west'?ui.leftLightText:ui.rightLightText;
+    db.classList.toggle('closed',state.doors[side]);dt.textContent=state.doors[side]?'CERRADA':'ABIERTA';lb.classList.toggle('lit',state.lights[side]);lt.textContent=state.lights[side]?'ENCENDIDA':'APAGADA';db.disabled=state.powerOut;lb.disabled=state.powerOut;
+    lights3D[side].intensity=state.lights[side]&&!state.powerOut?3.1:0;lights3D[side].userData.status.material.color.set(state.lights[side]?0xffcf5e:state.doors[side]?0xb72c2c:0x24412c);lights3D[side].userData.status.material.emissive.set(state.lights[side]?0xdbb338:state.doors[side]?0x7d1111:0x17441d);lights3D[side].userData.status.material.emissiveIntensity=state.lights[side]?.8:state.doors[side]?.35:.15;
+  }
+  $('monitorBtn').disabled=state.powerOut;$('monitorBtn').classList.toggle('active',state.monitor);
+}
+function getActiveDevices(){return 1+(state.doors.west?1:0)+(state.doors.east?1:0)+(state.lights.west?1:0)+(state.lights.east?1:0)+(state.monitor?1:0);}
+function getUsage(){return 1+(state.doors.west?.8:0)+(state.doors.east?.8:0)+(state.lights.west?1.15:0)+(state.lights.east?1.15:0)+(state.monitor?.52:0);}
+function updatePowerSystem(dt){
+  if(state.mode!=='playing')return;
+  if(!state.powerOut){const usage=getUsage();const drain=(.055+usage*.035)*dt* (1+(state.night-1)*.11);state.power=Math.max(0,state.power-drain);state.usage=usage;if(state.power<=0){triggerPowerOut();} }
+  else {state.outageTimer+=dt;if(state.outageTimer>3){ambientLight.intensity=.07;emergencyLight.intensity=.38+.18*Math.sin(state.elapsed*3);if(state.outageTimer>12&&state.elapsed<state.nightDuration-7){const threatening=Object.values(state.anims).some(e=>e.active&&['westDoor','eastDoor'].includes(e.location));if(threatening&&Math.random()<dt*.22){gameOver('La oficina quedó a oscuras. Algo se movió antes de que el reloj llegara a las seis.');}}}}
+  updatePowerUI();
+}
+function triggerPowerOut(){state.powerOut=true;state.outageTimer=0;state.doors={west:false,east:false};state.lights={west:false,east:false};state.monitor=false;ui.monitor.classList.add('hidden');currentCamera=officeCamera;for(const side of ['west','east'])doors3D[side].userData.targetY=doors3D[side].userData.openY;ambientLight.intensity=.06;emergencyLight.intensity=.4;soundEvent('power');showToast('FALLO DE ENERGÍA','Los cierres magnéticos se han liberado. El sistema de vigilancia está fuera de línea.',4300);updateControls();}
+function updatePowerUI(){ui.powerNumber.textContent=`${Math.ceil(state.power)}%`;ui.powerFill.style.width=`${state.power}%`;ui.powerFill.style.background=state.power<20?'#ff555a':state.power<45?'#ffc66d':'#9dffb0';ui.powerNumber.style.color=state.power<20?'#ff676b':state.power<45?'#ffc66d':'var(--green)';ui.usageText.textContent=`CONSUMO: ${state.powerOut?'0':state.usage.toFixed(1)+' UNIDADES'} · ${getActiveDevices()} DISPOSITIVOS`;const bars=ui.usageBars.querySelectorAll('i');const n=state.powerOut?0:Math.min(5,Math.ceil(state.usage/0.85));bars.forEach((b,i)=>{b.classList.toggle('on',i<n);b.style.background=i<n?(n>=4?'#ff555a':n>=3?'#ffc66d':'#ffc66d'):'transparent';});}
+function updateClockUI(){const hour=Math.min(6,Math.floor(state.elapsed/state.nightDuration*6));ui.clock.textContent=hour===0?'12:00 AM':`${hour}:00 AM`;ui.nightLabel.textContent=`TURNO 0${state.night} // NOCHE ${state.night}`;}
+function updateNightClock(dt){state.elapsed+=dt;state.activeElapsed+=dt;const progress=Math.min(1,state.elapsed/state.nightDuration);const hour=Math.min(6,Math.floor(progress*6));ui.clock.textContent=hour===0?'12:00 AM':`${hour}:00 AM`;ui.nightLabel.textContent=`TURNO 0${state.night} // NOCHE ${state.night}`;if(state.elapsed>=state.nightDuration)winNight();}
+function formatTime(seconds){const total=Math.floor(seconds);return `${String(Math.floor(total/3600)).padStart(2,'0')}:${String(Math.floor(total/60)%60).padStart(2,'0')}:${String(total%60).padStart(2,'0')}`;}
+function updateAnimatronics(dt){
+  if(state.mode!=='playing')return;
+  const nightFactor=1+(state.night-1)*.28;
+  for(const enemy of Object.values(state.anims)){
+    if(!enemy.active||enemy.state==='attacking')continue;
+    if(enemy.state==='moving'&&enemy.moveStart&&enemy.moveTarget){
+      enemy.moveProgress+=dt;const amount=Math.min(1,enemy.moveProgress/Math.max(.1,enemy.moveDuration));
+      enemy.group.position.lerpVectors(enemy.moveStart,enemy.moveTarget,THREE.MathUtils.smoothstep(amount,0,1));
+      enemy.group.userData.limbs.forEach((limb,i)=>{limb.rotation.x=Math.sin(state.elapsed*(enemy.rushing?7:3.2)+i*2)*.23;});
+      if(amount>=1){enemy.group.position.copy(enemy.moveTarget);enemy.moveTarget=null;enemy.moveStart=null;enemy.state=enemy.location.endsWith('Door')?'near-office':'patrolling';if(enemy.rushing&&!enemy.location.endsWith('Door'))enemy.timer=.08;}
+      continue;
+    }
+    if(enemy.stun>0){enemy.stun-=dt;enemy.state='blocked';if(enemy.stun<=0){enemy.state='patrolling';enemy.blockedDoor='';}continue;}
+    if(enemy.state==='blocked')enemy.state='patrolling';
+    const atEnd=enemy.location.endsWith('Door');
+    if(atEnd){
+      enemy.state='near-office';enemy.doorTimer+=dt;
+      const side=enemy.location==='westDoor'?'west':'east';
+      if(state.doors[side]){enemy.doorTimer=0;enemy.state='blocked';enemy.stun=2+Math.random()*1.2;enemy.index=Math.max(0,enemy.index-1);enemy.location=enemy.route[Math.max(0,enemy.index)];placeAnimatronic(enemy,enemy.location);enemy.group.visible=false;soundEvent('blocked');continue;}
+      const grace=enemy.name==='Pip'?2.5:enemy.name==='Rusty'?1.65:3.5-(state.night-1)*.35;
+      if(enemy.doorTimer>grace){enemy.state='attacking';gameOver(`${enemy.name} ha alcanzado la oficina. La próxima vez, escucha las señales y vigila las entradas.`);return;}
+      continue;
+    }
+    enemy.timer-=dt;
+    let interval=enemy.name==='Bruno'?13:enemy.name==='Mica'?11:enemy.name==='Pip'?12:15;
+    interval=(interval-(state.night-1)*1.6)/nightFactor;
+    if(enemy.name==='Bruno'&&state.monitor&&state.camera===0)interval*=1.24;
+    if(enemy.name==='Mica'&&state.monitor&&state.camera===4)interval*=1.35;
+    if(enemy.name==='Rusty'){
+      const notWatching=Math.max(0,state.elapsed-state.lastCameraVisit);
+      state.foxyMeter=Math.min(100,state.foxyMeter+dt*(state.monitor&&state.camera===7?-.9:.65+(notWatching>17?.72:0))*(1+(state.night-1)*.2));
+      if(state.foxyMeter>=100){startFoxRush(enemy);continue;}
+      interval*=.92;
+    }
+    if(enemy.name==='Rusty'&&!state.monitor)interval*=.82;
+    const watchCam=state.monitor&&state.camera===LOCATIONS[enemy.location]?.cam;
+    if(watchCam&&enemy.name==='Bruno')interval*=1.5;
+    if(enemy.timer<=0){
+      const baseChance=enemy.name==='Bruno'?.68:enemy.name==='Mica'?.74:enemy.name==='Pip'?.62:.54;
+      const chance=Math.min(.94,baseChance+(state.night-1)*.07+(getUsage()>3?.07:0));
+      enemy.timer=interval*(.72+Math.random()*.68);
+      if(Math.random()<chance){moveAnimatronic(enemy);}
+    }
+    enemy.group.position.y=Math.sin(state.elapsed*2.4+enemy.group.userData.sway)*.025;
+    enemy.group.rotation.z=Math.sin(state.elapsed*1.3+enemy.group.userData.sway)*.015;
+    enemy.group.userData.limbs.forEach((limb,i)=>{limb.rotation.x=Math.sin(state.elapsed*(enemy.name==='Rusty'?4.2:2.7)+i*2+enemy.group.userData.sway)*.045;});
+  }
+  if(state.monitor)updateCameraReadout();
+}
+function moveAnimatronic(enemy){
+  const route=enemy.route;let nextIndex=enemy.index+1;if(nextIndex>=route.length){enemy.index=route.length-1;nextIndex=enemy.index;}const next=route[nextIndex];
+  // Door routes are the only terminal nodes; blocked routes force the enemy to retreat along its connected path.
+  if(next==='westDoor'&&state.doors.west){enemy.rushing=false;enemy.state='blocked';enemy.stun=2.2;placeAnimatronic(enemy,enemy.location);enemy.group.visible=true;soundEvent('blocked');return;}
+  if(next==='eastDoor'&&state.doors.east){enemy.rushing=false;enemy.state='blocked';enemy.stun=2.2;placeAnimatronic(enemy,enemy.location);enemy.group.visible=true;soundEvent('blocked');return;}
+  enemy.index=nextIndex;enemy.location=next;enemy.state='moving';enemy.doorTimer=0;enemy.moveStart=enemy.group.position.clone();enemy.moveTarget=new THREE.Vector3(...LOCATIONS[next].pos);enemy.moveProgress=0;enemy.moveDuration=Math.max(.85,enemy.moveStart.distanceTo(enemy.moveTarget)/(enemy.rushing?4.5:1.8));enemy.group.visible=true;enemy.aggression+=.12;soundEvent('step');
+  if(Math.random()<.17+(state.night-1)*.07){showToast('RUIDO DETECTADO',`${enemy.name}: movimiento registrado en ${LOCATIONS[next].name.toLowerCase()}.`,1800);}
+  if(enemy.name==='Bruno'&&enemy.index===2&&Math.random()<.45)soundEvent('laugh');
+  if(enemy.name==='Mica'&&next==='kitchen')playNoise(.55,.04);
+}
+function startFoxRush(enemy){state.foxyMeter=0;enemy.rushing=true;soundEvent('laugh');showToast('ALERTA DE MOVIMIENTO','Un mecanismo corre por el pasillo. ¡Cierra la puerta este!',2300);if(state.doors.east){enemy.rushing=false;enemy.state='blocked';enemy.stun=2.8;enemy.moveTarget=null;enemy.moveStart=null;soundEvent('blocked');return;}enemy.timer=.05;moveAnimatronic(enemy);}
+function updateDoorsAndLights(dt){for(const side of ['west','east']){const door=doors3D[side];if(door.userData.targetY===undefined)door.userData.targetY=door.position.y;const target=door.userData.targetY;door.position.y=THREE.MathUtils.damp(door.position.y,target,6,dt);if(Math.abs(door.position.y-target)<.015)door.position.y=target;}}
+function updateNightEvents(dt){
+  state.eventClock+=dt;state.ambienceTimer-=dt;
+  if(state.ambienceTimer<=0){state.ambienceTimer=12+Math.random()*14;if(Math.random()<.75)playTone(42+Math.random()*30,.8,'triangle',.025,-14);if(Math.random()<.24){playNoise(.28,.025);if(Math.random()<.5)soundEvent('laugh');}}
+  if(state.eventClock>22&&Math.random()<dt*.012&&state.hiddenEvent<state.night){state.hiddenEvent++;const poster=scene.getObjectByName('right-poster');if(poster)poster.material.color.set(0x7c2927);showToast('SEÑAL ANÓMALA','Una figura parece estar en el borde de la imagen. Cuando vuelves a mirar, ya no está.',2600);playTone(190,.16,'sine',.035,-45);}
+  if(state.flicker&&Math.random()<dt*.07){for(const l of pointLights){if(l.userData.baseIntensity!==undefined)l.intensity=l.userData.baseIntensity*(.65+Math.random()*.45);}}
+}
+function updateOfficeLook(){officeCamera.rotation.y=state.lookYaw;officeCamera.rotation.x=state.lookPitch;}
+function updateSceneAnimations(dt){
+  updateDoorsAndLights(dt);fanBlades.forEach(f=>f.rotation.z+=dt*7);if(dustPoints){dustPoints.rotation.y+=dt*.004;const arr=dustGeometry.attributes.position.array;for(let i=1;i<arr.length;i+=3){arr[i]+=.0009*dt*60;if(arr[i]>4)arr[i]=0;}dustGeometry.attributes.position.needsUpdate=true;}
+  const sign=scene.getObjectByName('sign-glow');if(sign&&state.flicker){sign.material.emissiveIntensity=.48+Math.max(0,Math.sin(state.elapsed*4.3))*.2+(Math.random()<.012?.8:0);}
+  if(powerLamp)powerLamp.intensity=.6+.3*Math.sin(state.elapsed*5);
+  updateOfficeLook();
+}
+function pauseGame(){if(state.mode!=='playing')return;state.pauseFrom='playing';state.mode='paused';state.monitor=false;ui.monitor.classList.add('hidden');showModal('PAUSA','El reloj se ha detenido. El sistema permanece en espera.',[
+ {label:'▶ CONTINUAR',primary:true,action:resumeGame},{label:'⚙ AJUSTES',action:()=>{ui.modal.classList.add('hidden');state.mode='paused';state.settingsBefore='playing';showMenuPanel('settingsMenu');ui.hud.classList.add('hidden');}}, {label:'SALIR AL MENÚ',action:()=>{state.mode='menu';ui.modal.classList.add('hidden');ui.hud.classList.add('hidden');ui.brand.classList.remove('hidden');showMenuPanel('mainMenu');}}
+]);}
+function resumeGame(){state.mode='playing';ui.modal.classList.add('hidden');currentCamera=officeCamera;}
+function showModal(title,text,actions){$('modalTitle').textContent=title;$('modalText').textContent=text;const container=$('modalActions');container.innerHTML='';actions.forEach(a=>{const b=document.createElement('button');b.textContent=a.label;if(a.primary)b.className='active';b.addEventListener('click',a.action);container.appendChild(b);});ui.modal.classList.remove('hidden');}
+function winNight(){if(state.mode!=='playing')return;state.mode='won';state.monitor=false;ui.monitor.classList.add('hidden');ui.dangerFlash.style.opacity='0';state.unlocked=Math.max(state.unlocked,Math.min(5,state.night+1));saveProgress();updateMenu();soundEvent('win');ui.hud.classList.add('hidden');if(state.night<5){showModal('6:00 AM',`Has sobrevivido a la noche ${state.night}. El turno ha terminado, pero el registro de mantenimiento sigue incompleto.`,[
+ {label:'SIGUIENTE NOCHE ▶',primary:true,action:()=>startNight(state.night+1)},{label:'REPETIR NOCHE',action:()=>startNight(state.night)},{label:'MENÚ PRINCIPAL',action:()=>backToMenu()}]);}else{showModal('TURNO COMPLETADO',`Has sobrevivido las cinco noches. El último registro se ha desbloqueado. No hay más turnos programados… por ahora.`,[
+ {label:'VER ARCHIVO',primary:true,action:()=>{ui.modal.classList.add('hidden');state.mode='playing';openArchive();state.mode='won';}},{label:'VOLVER AL MENÚ',action:()=>backToMenu()}]);}}
+function gameOver(reason){if(state.mode!=='playing')return;const attacker=Object.values(state.anims).find(e=>e.state==='attacking')||Object.values(state.anims).find(e=>e.active);if(attacker){const forward=new THREE.Vector3(0,0,-1).applyEuler(officeCamera.rotation);attacker.group.visible=true;attacker.group.position.copy(officeCamera.position).add(forward.multiplyScalar(1.25));attacker.group.position.y=.1;attacker.group.rotation.y=officeCamera.rotation.y;attacker.group.scale.setScalar(1.75);}state.mode='lost';state.monitor=false;ui.monitor.classList.add('hidden');ui.hud.classList.add('hidden');state.attackLock=2;ui.dangerFlash.style.opacity='.7';soundEvent('jumpscare');setTimeout(()=>ui.dangerFlash.style.opacity='0',450);showModal('TURNO INTERRUMPIDO',reason,[{label:'↻ REINTENTAR',primary:true,action:()=>startNight(state.night)},{label:'SALIR AL MENÚ',action:()=>backToMenu()}]);}
+function restartNight(){startNight(state.night);}
+function backToMenu(){state.mode='menu';ui.modal.classList.add('hidden');ui.hud.classList.add('hidden');ui.monitor.classList.add('hidden');ui.brand.classList.remove('hidden');showMenuPanel('mainMenu');updateMenu();currentCamera=officeCamera;}
+function animate(now){if(!renderer)return;const dt=Math.min(.05,Math.max(0,(now-(state.lastFrame||now))/1000));state.lastFrame=now;
+  if(state.mode==='playing'){
+    updateNightClock(dt);if(state.mode==='playing'){updatePowerSystem(dt);updateAnimatronics(dt);updateNightEvents(dt);if(state.toastTimer>0){state.toastTimer-=dt;if(state.toastTimer<=0)ui.toast.classList.add('hidden');}}
+  }
+  updateSceneAnimations(dt);
+  renderer.setScissorTest(false);
+  renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
+  renderer.render(scene,officeCamera);
+  if(state.mode==='playing'&&state.monitor&&!state.powerOut){
+    currentCamera=cameras3D[state.camera];updateCameraReadout();
+    const rect=ui.cameraView.getBoundingClientRect();
+    const left=Math.max(0,rect.left), top=Math.max(0,rect.top), right=Math.min(window.innerWidth,rect.right), bottom=Math.min(window.innerHeight,rect.bottom);
+    const width=Math.max(1,right-left), height=Math.max(1,bottom-top);
+    if(width>1&&height>1){
+      const vx=Math.round(left), vy=Math.round(window.innerHeight-bottom), vw=Math.round(width), vh=Math.round(height);
+      currentCamera.aspect=width/height;currentCamera.updateProjectionMatrix();
+      renderer.setScissorTest(true);renderer.setViewport(vx,vy,vw,vh);renderer.setScissor(vx,vy,vw,vh);renderer.render(scene,currentCamera);renderer.setScissorTest(false);
+    }
+  } else currentCamera=officeCamera;
+}
+
+// Start-up and preference restoration.
+try{const savedVolume=localStorage.getItem('d13-volume');if(savedVolume!==null){const v=Number(savedVolume);if(Number.isFinite(v)&&v>=0&&v<=1){state.volume=v;$('volumeRange').value=Math.round(v*100);}}const q=localStorage.getItem('d13-quality');if(['low','medium','high'].includes(q)){state.quality=q;$('qualitySelect').value=q;}}catch(e){}
+import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').then(module=>{THREE=module;initGame();}).catch(error=>{
+  console.error('No se pudo inicializar Three.js:',error);
+  const notice=document.createElement('p');notice.className='menu-copy';notice.style.cssText='color:#ffb5b5;border:1px solid #753f43;padding:12px;background:#200e10';
+  notice.textContent='No se pudo cargar el motor 3D de Three.js. Comprueba tu conexión a Internet y abre este archivo en un navegador moderno; el motor se descarga desde el CDN de jsDelivr.';
+  $('mainMenu').appendChild(notice);
+  document.querySelectorAll('.menu-buttons button').forEach(button=>button.disabled=true);
+});
+</script>
+</body>
+</html>
